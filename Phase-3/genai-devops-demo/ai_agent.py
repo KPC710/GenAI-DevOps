@@ -4,7 +4,7 @@ import sys
 from openai import OpenAI
 from pathlib import Path
 
-MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
+MODEL = os.getenv("OPENAI_MODEL", "gpt-5.5")
 PROJECT_DIR = Path(__file__).resolve().parent
 ANALYSIS_SCHEMA = {
     "type": "json_schema",
