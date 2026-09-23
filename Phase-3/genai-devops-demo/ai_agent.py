@@ -56,7 +56,9 @@ def analyze_failure(test_output):
     client = OpenAI()
     source_code = read_file(PROJECT_DIR / "app.py")
     test_code = read_file(PROJECT_DIR / "test_app.py")
-    prompt = build_prompt(test_output, source_code, test_code)
+    prompt = str(build_prompt(test_output, source_code, test_code)).strip()
+    if not prompt:
+        raise ValueError("Generated analysis prompt is empty.")
 
     response = client.responses.create(
         model=MODEL,
