@@ -2,12 +2,45 @@
 
 A small Python project demonstrating basic arithmetic functions with automated tests and a GitHub Actions CI workflow.
 
+## CI/CD Pipeline
+
+This project demonstrates a normal DevOps CI/CD workflow for a Python application:
+
+```text
+Git Push
+	|
+	v
+GitHub Actions
+	|
+	v
+Checkout Code
+	|
+	v
+Setup Python
+	|
+	v
+Install dependencies
+	|
+	v
+Run pytest
+	|
+	v
+  +---+---+
+  |       |
+ PASS    FAIL
+  |       |
+  v       v
+  ✅      ❌
+```
+
+The workflow checks out the code, configures Python, installs the project dependencies, and runs the test suite. A passing test suite completes the pipeline successfully; a failing test suite marks the pipeline as failed.
+
 ## Features
 
 - `add(a, b)` returns the sum of two values.
 - `multiply(a, b)` returns the product of two values.
 - Pytest tests cover both functions.
-- GitHub Actions runs the test suite on pushes to `main` and on pull requests, using Python 3.12.
+- GitHub Actions runs the test suite with Python 3.12 when manually triggered.
 
 ## Requirements
 
