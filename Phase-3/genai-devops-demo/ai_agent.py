@@ -5,6 +5,7 @@ from openai import OpenAI
 from pathlib import Path
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
+PROJECT_DIR = Path(__file__).resolve().parent
 
 def read_file(file_path):
     return Path(file_path).read_text(encoding="utf-8")
@@ -53,8 +54,8 @@ Rules:
 
 def analyze_failure(test_output):
     client = OpenAI()
-    source_code = read_file("Phase-3/genai-devops-demo/app.py")
-    test_code = read_file("Phase-3/genai-devops-demo/test_app.py")
+    source_code = read_file(PROJECT_DIR / "app.py")
+    test_code = read_file(PROJECT_DIR / "test_app.py")
     prompt = build_prompt(test_output, source_code, test_code)
 
     response = client.responses.create(

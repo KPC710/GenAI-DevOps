@@ -8,6 +8,7 @@ from ai_agent import analyze_failure
 ALLOWED_FILES = {
     "app.py",
 }
+PROJECT_DIR = Path(__file__).resolve().parent
 
 def run_tests():
     result = subprocess.run(
@@ -31,7 +32,31 @@ def apply_fix(result):
         raise RuntimeError(
             "AI confidence is below the safe threshold."
         )
-    if file_to_modify not in ALLOWED_FILES:
+    if not isinstance(file_to_modify, str):
+        raise RuntimeError("AI did not provide a valid file path.")
+
+    requested_path = Path(file_to_modify)
+    allowed_path = (PROJECT_DIR / "app.py").resolve()
+    candidate_paths = [requested_path]
+    if not requested_path.is_absolute():
+        candidate_paths.extend(
+            [
+                Path.cwd() / requested_path,
+                PROJECT_DIR / requested_path,
+                PROJECT_DIR.parents[1] / requested_path,
+            ]
+        )
+
+    target_path = next(
+        (
+            candidate.resolve()
+            for candidate in candidate_paths
+            if candidate.resolve() == allowed_path
+        ),
+        None,
+    )
+
+    if target_path is None or Path(file_to_modify).name not in ALLOWED_FILES:
         raise RuntimeError(
             f"File modification not allowed: {file_to_modify}"
         )
@@ -39,11 +64,11 @@ def apply_fix(result):
         raise RuntimeError(
             "AI did not provide replacement code."
         )
-    Path(file_to_modify).write_text(
+    target_path.write_text(
         replacement,
         encoding="utf-8",
     )
-    print(f"Applied AI fix to {file_to_modify}")
+    print(f"Applied AI fix to {target_path}")
 
 def main():
 
