@@ -116,6 +116,20 @@ GenAI/
 	  +-- tools.py
 	  +-- requirements.txt
 	  +-- README.md
+
++-- Phase-5/
+    +-- genai-devops-agent/
+	  +-- app.py
+	  +-- test_app.py
+	  +-- agent.py
+	  +-- tools.py
+	  +-- config.py
+	  +-- rag.py
+	  +-- github_tools.py
+	  +-- mcp_server.py
+	  +-- knowledge/
+	  +-- requirements.txt
+	  +-- README.md
 ```
 
 ## Phase 1: Conventional CI/CD
@@ -292,6 +306,51 @@ The agent is iterative rather than a single prompt-and-response script. It recei
 
 Read the detailed [Phase 4 README](Phase-4/genai-devops-demo/README.md).
 
+## Phase 5: RAG-Enabled DevOps Agent
+
+Phase 5 connects the complete architecture: GitHub Actions, a tool-using AI agent, local documentation retrieval, GitHub automation, and an MCP documentation server.
+
+```text
+Developer -> GitHub -> GitHub Actions -> pytest
+						  |
+						  v
+					     AI Agent
+						  |
+			  +-----------------+-----------------+
+			  |                 |                 |
+		     tools.py          rag.py       github_tools.py
+		     Files/tests     Knowledge       GitHub API/CLI
+						  |
+						  v
+					 Repair app.py
+						  |
+						  v
+					  Run pytest
+						  |
+						  v
+				     Branch -> Push -> PR
+						  |
+						  v
+					  Human Review
+```
+
+The Phase 5 agent can inspect repository files, search internal DevOps documentation, examine workflow runs and pull requests, modify approved application code, rerun tests, review the Git diff, and create a pull request after a successful repair.
+
+The architecture separates responsibilities:
+
+- `agent.py` is the LLM-driven orchestrator and decides which tool to call next.
+- `tools.py` provides safe file, test, status, and diff operations.
+- `rag.py` searches Markdown files in `knowledge/` for project-specific context.
+- `github_tools.py` connects the agent to GitHub CLI and repository operations.
+- `mcp_server.py` exposes documentation through standardized MCP tools.
+- `config.py` defines model selection, iteration limits, repair limits, protected files, and confidence rules.
+
+RAG and MCP serve different purposes. RAG is the agent's direct local search over `knowledge/*.md`; MCP exposes documentation capabilities as interoperable tools for compatible clients.
+
+The workflow creates a branch and pull request only when the agent produces a real `app.py` change and the verification flow succeeds. Tests, dependencies, and workflow files remain protected, and a human reviews the resulting pull request.
+
+Read the detailed [Phase 5 README](Phase-5/genai-devops-agent/README.md).
+
 ## Tool Responsibilities
 
 | Tool | Responsibility |
@@ -322,7 +381,7 @@ Automation is constrained at several boundaries:
 
 Each phase has a dedicated workflow under `.github/workflows/`. The workflows use a project-specific working directory so dependency installation and tests run against the correct phase.
 
-The Phase 3 and Phase 4 workflows require:
+The Phase 3, Phase 4, and Phase 5 workflows require:
 
 ```yaml
 permissions:
@@ -337,7 +396,7 @@ The repository must also allow GitHub Actions to create and approve pull request
 Each phase is an independent Python project with its own dependencies and README. To work on a phase:
 
 ```bash
-cd Phase-4/genai-devops-demo
+cd Phase-5/genai-devops-agent
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
