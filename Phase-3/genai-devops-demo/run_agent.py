@@ -1,0 +1,95 @@
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+from ai_agent import analyze_failure
+
+ALLOWED_FILES = {
+    "app.py",
+}
+
+def run_tests():
+    result = subprocess.run(
+        ["pytest", "-v"],
+        capture_output=True,
+        text=True,
+    )
+    output = result.stdout + "\n" + result.stderr
+    return result.returncode, output
+
+def apply_fix(result):
+
+    file_to_modify = result.get("file_to_modify")
+    replacement = result.get("replacement")
+    confidence = result.get("confidence", 0)
+
+    print(f"AI confidence: {confidence}")
+    print(f"AI wants to modify: {file_to_modify}")
+
+    if confidence < 0.80:
+        raise RuntimeError(
+            "AI confidence is below the safe threshold."
+        )
+    if file_to_modify not in ALLOWED_FILES:
+        raise RuntimeError(
+            f"File modification not allowed: {file_to_modify}"
+        )
+    if not replacement:
+        raise RuntimeError(
+            "AI did not provide replacement code."
+        )
+    Path(file_to_modify).write_text(
+        replacement,
+        encoding="utf-8",
+    )
+    print(f"Applied AI fix to {file_to_modify}")
+
+def main():
+
+    print("======================================")
+    print(" GenAI DevOps Autonomous Agent")
+    print("======================================")
+
+    print("\nRunning tests...")
+
+    exit_code, test_output = run_tests()
+
+    if exit_code == 0:
+        print("Tests already pass.")
+        return 0
+
+    print("\nTests failed.")
+    print("\nSending failure to GenAI...\n")
+
+    try:
+        result = analyze_failure(test_output)
+    except Exception as exc:
+        print(f"AI analysis failed: {exc}")
+        return 1
+
+    print("\nAI ANALYSIS")
+    print("-----------")
+    print(json.dumps(result, indent=2))
+
+    try:
+        apply_fix(result)
+    except Exception as exc:
+        print(f"\nUnsafe AI fix rejected: {exc}")
+        return 1
+
+    print("\nRunning tests after AI fix...")
+    exit_code, new_output = run_tests()
+    print(new_output)
+
+    if exit_code != 0:
+        print("AI fix did not resolve the failure.")
+        return 1
+
+    print("\n======================================")
+    print(" AI FIX SUCCESSFUL")
+    print("======================================")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
