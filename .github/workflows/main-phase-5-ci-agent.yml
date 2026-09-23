@@ -74,6 +74,10 @@ jobs:
 
         if: steps.tests.outcome == 'failure'
 
+        id: agent
+
+        continue-on-error: true
+
         env:
 
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -85,7 +89,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
 
         run: |
-
+          set -o pipefail
           python agent.py < ci-output.txt | tee ai-analysis.txt
 
 
@@ -95,7 +99,7 @@ jobs:
 
       - name: Git status
 
-        if: steps.tests.outcome == 'failure'
+        if: steps.agent.outcome == 'success'
 
         run: |
 
@@ -110,7 +114,7 @@ jobs:
 
       - name: Create AI branch
 
-        if: steps.tests.outcome == 'failure'
+        if: steps.agent.outcome == 'success'
 
         run: |
 
@@ -120,9 +124,18 @@ jobs:
 
           git add app.py
 
-          git commit -m "fix: AI generated CI repair" || true
+          if git diff --cached --quiet; then
+            echo "AI agent completed without producing an app.py change."
+            exit 1
+          fi
+
+          git config user.name "GenAI DevOps Agent"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix: AI generated CI repair"
 
           git push origin "$BRANCH"
+
+          echo "AI_BRANCH=$BRANCH" >> "$GITHUB_ENV"
 
 
       # ---------------------------------------
@@ -131,19 +144,16 @@ jobs:
 
       - name: Create Pull Request
 
-        if: steps.tests.outcome == 'failure'
+        if: steps.agent.outcome == 'success'
 
         env:
 
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         run: |
-
-          BRANCH="ai-fix-${GITHUB_RUN_ID}"
-
           gh pr create \
             --base main \
-            --head "$BRANCH" \
+            --head "$AI_BRANCH" \
             --title "AI generated CI fix" \
             --body-file ai-analysis.txt
 
@@ -167,3 +177,19 @@ jobs:
             ci-output.txt
 
             ai-analysis.txt
+
+
+      # ---------------------------------------
+      # Fail if the AI agent could not repair the code
+      # ---------------------------------------
+
+      - name: Fail if AI agent could not repair the code
+
+        if: steps.tests.outcome == 'failure' && steps.agent.outcome != 'success'
+
+        run: |
+
+          echo "GenAI agent could not safely fix the problem."
+
+          exit 1
+          
