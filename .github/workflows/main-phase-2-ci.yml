@@ -1,0 +1,80 @@
+name: GenAI DevOps CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Phase-2/genai-devops-demo
+    steps:
+
+      # -------------------------------
+      # 1. Checkout repository
+      # -------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # -------------------------------
+      # 2. Setup Python
+      # -------------------------------
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # -------------------------------
+      # 3. Install dependencies
+      # -------------------------------
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # -------------------------------
+      # 4. Run tests
+      # -------------------------------
+      - name: Run tests
+        id: tests
+        continue-on-error: true
+        run: |
+          pytest -v 2>&1 | tee test-output.txt
+
+      # -------------------------------
+      # 5. Analyze failure using GenAI
+      # -------------------------------
+      - name: Analyze failure with GenAI
+        if: steps.tests.outcome == 'failure'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          echo "Tests failed."
+          echo "Sending failure information to GenAI..."
+          
+          python ai_analyzer.py < test-output.txt | tee ai-analysis.txt
+
+      # -------------------------------
+      # 6. Upload AI analysis
+      # -------------------------------
+      - name: Upload AI analysis
+        if: steps.tests.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: genai-analysis
+          path: |
+            test-output.txt
+            ai-analysis.txt
+
+      # -------------------------------
+      # 7. Make pipeline fail if tests failed
+      # -------------------------------
+      - name: Fail pipeline
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo "Tests failed."
+          exit 1
