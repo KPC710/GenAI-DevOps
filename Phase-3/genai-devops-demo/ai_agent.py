@@ -78,6 +78,7 @@ Rules:
 6. The replacement must contain the COMPLETE file.
 7. If you cannot determine a safe fix, return confidence below 0.5.
 """
+    return prompt
 
 def analyze_failure(test_output):
     if not test_output.strip():
