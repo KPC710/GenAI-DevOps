@@ -5,10 +5,7 @@ import os
 # OpenAI Configuration
 # -----------------------------
 
-OPENAI_MODEL = os.getenv(
-    "OPENAI_MODEL",
-    "gpt-5.6"
-)
+OPENAI_MODEL = os.getenv("OPENAI_MODEL") or "gpt-5.5"
 
 
 # -----------------------------
