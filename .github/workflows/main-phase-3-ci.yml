@@ -12,6 +12,9 @@ permissions:
 jobs:
   ai-devops:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Phase-3/genai-devops-demo
     steps:
 
       # --------------------------------
