@@ -52,7 +52,7 @@ jobs:
         continue-on-error: true
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: gpt-5.5
+          OPENAI_MODEL: gpt-5.6-luna
         run: |
           python run_agent.py
 
