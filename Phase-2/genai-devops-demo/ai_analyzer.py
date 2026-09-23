@@ -38,7 +38,7 @@ Be concise and technically accurate.
 """
 
     response = client.responses.create(
-        model="gpt-5.6",
+        model="gpt-5.6-luna",
         input=prompt
     )
 
