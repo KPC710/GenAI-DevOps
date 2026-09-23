@@ -4,35 +4,19 @@ import sys
 
 from openai import OpenAI
 
-from config import (
-    OPENAI_MODEL,
-    MAX_AGENT_ITERATIONS
-)
+from config import OPENAI_MODEL, MAX_AGENT_ITERATIONS
 
-from tools import (
-    list_files,
-    read_file,
-    edit_file,
-    run_tests,
-    git_diff,
-    git_status
-)
+from tools import list_files, read_file, edit_file, run_tests, git_diff, git_status
 
 from rag import search_knowledge
 
-from github_tools import (
-    get_workflow_runs,
-    get_pull_requests
-)
-
+from github_tools import get_workflow_runs, get_pull_requests
 
 # --------------------------------------------------
 # OpenAI client
 # --------------------------------------------------
 
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 # --------------------------------------------------
@@ -40,7 +24,6 @@ client = OpenAI(
 # --------------------------------------------------
 
 TOOL_DEFINITIONS = [
-
     {
         "type": "function",
         "name": "list_files",
@@ -49,28 +32,20 @@ TOOL_DEFINITIONS = [
             "type": "object",
             "properties": {},
             "required": [],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
-
     {
         "type": "function",
         "name": "read_file",
         "description": "Read a repository file.",
         "parameters": {
             "type": "object",
-            "properties": {
-                "file_path": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "file_path"
-            ],
-            "additionalProperties": False
-        }
+            "properties": {"file_path": {"type": "string"}},
+            "required": ["file_path"],
+            "additionalProperties": False,
+        },
     },
-
     {
         "type": "function",
         "name": "edit_file",
@@ -78,21 +53,13 @@ TOOL_DEFINITIONS = [
         "parameters": {
             "type": "object",
             "properties": {
-                "file_path": {
-                    "type": "string"
-                },
-                "content": {
-                    "type": "string"
-                }
+                "file_path": {"type": "string"},
+                "content": {"type": "string"},
             },
-            "required": [
-                "file_path",
-                "content"
-            ],
-            "additionalProperties": False
-        }
+            "required": ["file_path", "content"],
+            "additionalProperties": False,
+        },
     },
-
     {
         "type": "function",
         "name": "run_tests",
@@ -101,10 +68,9 @@ TOOL_DEFINITIONS = [
             "type": "object",
             "properties": {},
             "required": [],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
-
     {
         "type": "function",
         "name": "git_diff",
@@ -113,10 +79,9 @@ TOOL_DEFINITIONS = [
             "type": "object",
             "properties": {},
             "required": [],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
-
     {
         "type": "function",
         "name": "git_status",
@@ -125,28 +90,20 @@ TOOL_DEFINITIONS = [
             "type": "object",
             "properties": {},
             "required": [],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
-
     {
         "type": "function",
         "name": "search_knowledge",
         "description": "Search internal DevOps documentation.",
         "parameters": {
             "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "query"
-            ],
-            "additionalProperties": False
-        }
+            "properties": {"query": {"type": "string"}},
+            "required": ["query"],
+            "additionalProperties": False,
+        },
     },
-
     {
         "type": "function",
         "name": "get_workflow_runs",
@@ -155,10 +112,9 @@ TOOL_DEFINITIONS = [
             "type": "object",
             "properties": {},
             "required": [],
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
-
     {
         "type": "function",
         "name": "get_pull_requests",
@@ -167,9 +123,9 @@ TOOL_DEFINITIONS = [
             "type": "object",
             "properties": {},
             "required": [],
-            "additionalProperties": False
-        }
-    }
+            "additionalProperties": False,
+        },
+    },
 ]
 
 
@@ -177,24 +133,17 @@ TOOL_DEFINITIONS = [
 # Tool router
 # --------------------------------------------------
 
-def execute_tool(
-    tool_name,
-    arguments
-):
+
+def execute_tool(tool_name, arguments):
 
     if tool_name == "list_files":
         return list_files()
 
     if tool_name == "read_file":
-        return read_file(
-            arguments["file_path"]
-        )
+        return read_file(arguments["file_path"])
 
     if tool_name == "edit_file":
-        return edit_file(
-            arguments["file_path"],
-            arguments["content"]
-        )
+        return edit_file(arguments["file_path"], arguments["content"])
 
     if tool_name == "run_tests":
         return run_tests()
@@ -206,9 +155,7 @@ def execute_tool(
         return git_status()
 
     if tool_name == "search_knowledge":
-        return search_knowledge(
-            arguments["query"]
-        )
+        return search_knowledge(arguments["query"])
 
     if tool_name == "get_workflow_runs":
         return get_workflow_runs()
@@ -216,10 +163,7 @@ def execute_tool(
     if tool_name == "get_pull_requests":
         return get_pull_requests()
 
-    return {
-        "success": False,
-        "error": f"Unknown tool: {tool_name}"
-    }
+    return {"success": False, "error": f"Unknown tool: {tool_name}"}
 
 
 # --------------------------------------------------
@@ -267,10 +211,10 @@ Your final response must contain:
 # Agent
 # --------------------------------------------------
 
+
 def run_agent(error_log):
 
     input_items = [
-
         {
             "role": "user",
             "content": f"""
@@ -279,36 +223,22 @@ CI/CD pipeline failure:
 {error_log}
 
 Investigate and repair the failure.
-"""
+""",
         }
-
     ]
 
-    for iteration in range(
-        MAX_AGENT_ITERATIONS
-    ):
+    for iteration in range(MAX_AGENT_ITERATIONS):
 
         response = client.responses.create(
-
             model=OPENAI_MODEL,
-
             instructions=INSTRUCTIONS,
-
             tools=TOOL_DEFINITIONS,
-
-            input=input_items
+            input=input_items,
         )
 
-        input_items.extend(
-            response.output
-        )
+        input_items.extend(response.output)
 
-        tool_calls = [
-
-            item
-            for item in response.output
-            if item.type == "function_call"
-        ]
+        tool_calls = [item for item in response.output if item.type == "function_call"]
 
         if not tool_calls:
 
@@ -318,35 +248,21 @@ Investigate and repair the failure.
 
             try:
 
-                arguments = json.loads(
-                    tool_call.arguments
-                )
+                arguments = json.loads(tool_call.arguments)
 
-                result = execute_tool(
-                    tool_call.name,
-                    arguments
-                )
+                result = execute_tool(tool_call.name, arguments)
 
             except Exception as exc:
 
-                result = {
-                    "success": False,
-                    "error": str(exc)
+                result = {"success": False, "error": str(exc)}
+
+            input_items.append(
+                {
+                    "type": "function_call_output",
+                    "call_id": tool_call.call_id,
+                    "output": json.dumps(result),
                 }
-
-            input_items.append({
-
-                "type":
-                    "function_call_output",
-
-                "call_id":
-                    tool_call.call_id,
-
-                "output":
-                    json.dumps(
-                        result
-                    )
-            })
+            )
 
     return "Agent stopped: maximum iterations reached."
 
@@ -361,24 +277,18 @@ if __name__ == "__main__":
 
     if not error_log.strip():
 
-        print(
-            "No CI error log provided."
-        )
+        print("No CI error log provided.")
 
         sys.exit(1)
 
     try:
 
-        result = run_agent(
-            error_log
-        )
+        result = run_agent(error_log)
 
         print(result)
 
     except Exception as exc:
 
-        print(
-            f"Agent failed: {exc}"
-        )
+        print(f"Agent failed: {exc}")
 
         sys.exit(1)
