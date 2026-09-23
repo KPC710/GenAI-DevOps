@@ -6,6 +6,31 @@ from pathlib import Path
 
 MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
 PROJECT_DIR = Path(__file__).resolve().parent
+ANALYSIS_SCHEMA = {
+    "type": "json_schema",
+    "name": "devops_failure_analysis",
+    "strict": True,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "root_cause": {"type": "string"},
+            "failed_test": {"type": "string"},
+            "file_to_modify": {"type": "string"},
+            "explanation": {"type": "string"},
+            "replacement": {"type": "string"},
+            "confidence": {"type": "number"},
+        },
+        "required": [
+            "root_cause",
+            "failed_test",
+            "file_to_modify",
+            "explanation",
+            "replacement",
+            "confidence",
+        ],
+        "additionalProperties": False,
+    },
+}
 
 def read_file(file_path):
     return Path(file_path).read_text(encoding="utf-8")
@@ -63,10 +88,11 @@ def analyze_failure(test_output):
     response = client.responses.create(
         model=MODEL,
         instructions=(
-            "You are a reliable software engineering agent. "
-            "Return valid JSON only."
+            "You are a reliable software engineering agent. Analyze the supplied "
+            "failed tests and return a safe minimal fix. Do not ask questions."
         ),
         input=prompt,
+        text={"format": ANALYSIS_SCHEMA},
     )
 
     text = response.output_text.strip()
@@ -78,6 +104,20 @@ def analyze_failure(test_output):
         text = text.strip()
 
     result = json.loads(text)
+
+    required_fields = {
+        "root_cause",
+        "failed_test",
+        "file_to_modify",
+        "explanation",
+        "replacement",
+        "confidence",
+    }
+    missing_fields = required_fields - result.keys()
+    if missing_fields:
+        raise ValueError(
+            f"AI response is missing required fields: {sorted(missing_fields)}"
+        )
 
     return result
 
