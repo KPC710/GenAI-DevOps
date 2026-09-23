@@ -8,23 +8,23 @@ This project demonstrates a normal DevOps CI/CD workflow for a Python applicatio
 
 ```text
 Git Push
-	|
-	v
+    |
+    v
 GitHub Actions
-	|
-	v
+    |
+    v
 Checkout Code
-	|
-	v
+    |
+    v
 Setup Python
-	|
-	v
+    |
+    v
 Install dependencies
-	|
-	v
+    |
+    v
 Run pytest
-	|
-	v
+    |
+    v
   +---+---+
   |       |
  PASS    FAIL

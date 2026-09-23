@@ -126,12 +126,12 @@ TOOL_DEFINITIONS = [
 def execute_tool(name, arguments):
     if name == "list_files":
         return tools.list_files()
-    
+
     if name == "read_file":
         return tools.read_file(
             arguments["path"]
         )
-    
+
     if name == "run_tests":
         return tools.run_tests()
     if name == "edit_file":

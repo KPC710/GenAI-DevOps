@@ -5,55 +5,55 @@ Phase 3 extends the CI/CD pipeline into an autonomous remediation workflow. When
 ## Autonomous Remediation Flow
 
 ```text
-					Git Push
-					   |
-					   v
-				 GitHub Actions
-					   |
-					   v
-				   Run Tests
-					   |
-					   v
-					FAIL
-					   |
-					   v
-				Collect failure
-					   |
-					   v
-				  GenAI Agent
-					   |
-			 +---------+---------+
-			 |                   |
-		Analyze code         Analyze logs
-			 |                   |
-			 +---------+---------+
-					   |
-					   v
-				 Generate Fix
-					   |
-					   v
-				 Safety Check
-					   |
-					   v
-				 Modify app.py
-					   |
-					   v
-				   Run Tests
-					   |
-				 +-----+-----+
-				 |           |
-				FAIL        PASS
-				 |           |
-				 v           v
-			  STOP       Git Branch
-							 |
-							 v
-						Pull Request
-							 |
-							 v
-						  HUMAN
-							 |
-					   Review & Merge
+                    Git Push
+                       |
+                       v
+                 GitHub Actions
+                       |
+                       v
+                   Run Tests
+                       |
+                       v
+                    FAIL
+                       |
+                       v
+                Collect failure
+                       |
+                       v
+                  GenAI Agent
+                       |
+             +---------+---------+
+             |                   |
+        Analyze code         Analyze logs
+             |                   |
+             +---------+---------+
+                       |
+                       v
+                 Generate Fix
+                       |
+                       v
+                 Safety Check
+                       |
+                       v
+                 Modify app.py
+                       |
+                       v
+                   Run Tests
+                       |
+                 +-----+-----+
+                 |           |
+                FAIL        PASS
+                 |           |
+                 v           v
+              STOP       Git Branch
+                             |
+                             v
+                        Pull Request
+                             |
+                             v
+                          HUMAN
+                             |
+                       Review & Merge
 ```
 
 ## How It Works
@@ -90,23 +90,23 @@ The pipeline sends the test failure to an LLM. The LLM explains the root cause, 
 
 ```text
 CI error
-	|
-	v
+    |
+    v
    LLM
-	|
-	v
+    |
+    v
 Understand failure
-	|
-	v
+    |
+    v
 Generate fix
-	|
-	v
+    |
+    v
 Apply fix safely
-	|
-	v
+    |
+    v
 Run tests again
-	|
-	v
+    |
+    v
 Create pull request
 ```
 

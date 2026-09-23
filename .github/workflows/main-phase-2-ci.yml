@@ -53,7 +53,7 @@ jobs:
         run: |
           echo "Tests failed."
           echo "Sending failure information to GenAI..."
-          
+
           python ai_analyzer.py < test-output.txt | tee ai-analysis.txt
 
       # -------------------------------

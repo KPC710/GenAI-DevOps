@@ -8,18 +8,18 @@ The project starts with a conventional CI pipeline and progressively adds intell
 
 ```text
 Developer -> GitHub -> GitHub Actions -> Tests
-					    |
-					    v
-				   Failure analysis
-					    |
-					    v
-				     GenAI Agent
-					    |
-					    v
-			     Safe code remediation
-					    |
-					    v
-				  Pull request review
+                        |
+                        v
+                   Failure analysis
+                        |
+                        v
+                     GenAI Agent
+                        |
+                        v
+                 Safe code remediation
+                        |
+                        v
+                  Pull request review
 ```
 
 The central principle is simple:
@@ -31,40 +31,40 @@ The central principle is simple:
 ```text
 LEVEL 1
 Python + Git + GitHub
-	  |
-	  v
+      |
+      v
 LEVEL 2
 GitHub Actions / CI/CD
-	  |
-	  v
+      |
+      v
 LEVEL 3
 GenAI API
-	  |
-	  v
+      |
+      v
 LEVEL 4
 GenAI analyzes CI failures
-	  |
-	  v
+      |
+      v
 LEVEL 5
 AI Agent + Tools
-	  |
-	  v
+      |
+      v
 LEVEL 6
 GitHub API
-	  |
-	  v
+      |
+      v
 LEVEL 7
 Automatic PR creation
-	  |
-	  v
+      |
+      v
 LEVEL 8
 RAG + documentation
-	  |
-	  v
+      |
+      v
 LEVEL 9
 MCP
-	  |
-	  v
+      |
+      v
 LEVEL 10
 Multi-step autonomous DevOps agent
 ```
@@ -110,26 +110,26 @@ GenAI/
 |
 +-- Phase-4/
     +-- genai-devops-demo/
-	  +-- app.py
-	  +-- test_app.py
-	  +-- agent.py
-	  +-- tools.py
-	  +-- requirements.txt
-	  +-- README.md
+      +-- app.py
+      +-- test_app.py
+      +-- agent.py
+      +-- tools.py
+      +-- requirements.txt
+      +-- README.md
 
 +-- Phase-5/
     +-- genai-devops-agent/
-	  +-- app.py
-	  +-- test_app.py
-	  +-- agent.py
-	  +-- tools.py
-	  +-- config.py
-	  +-- rag.py
-	  +-- github_tools.py
-	  +-- mcp_server.py
-	  +-- knowledge/
-	  +-- requirements.txt
-	  +-- README.md
+      +-- app.py
+      +-- test_app.py
+      +-- agent.py
+      +-- tools.py
+      +-- config.py
+      +-- rag.py
+      +-- github_tools.py
+      +-- mcp_server.py
+      +-- knowledge/
+      +-- requirements.txt
+      +-- README.md
 ```
 
 ## Phase 1: Conventional CI/CD
@@ -211,25 +211,25 @@ Phase 3 moves from explanation to guarded code remediation.
 
 ```text
 CI test failure
-	 |
-	 v
+     |
+     v
 Read failure output, source, and tests
-	 |
-	 v
+     |
+     v
 Send context to GenAI
-	 |
-	 v
+     |
+     v
 Receive structured remediation
-	 |
-	 v
+     |
+     v
 Validate confidence and target file
-	 |
-	 v
+     |
+     v
 Modify app.py
-	 |
-	 v
+     |
+     v
 Run tests again
-	 |
+     |
    +---+---+
    |       |
  FAIL    PASS
@@ -259,46 +259,46 @@ Phase 4 gives the agent explicit repository tools so it can investigate before a
 
 ```text
 GitHub Actions
-	|
-	v
+    |
+    v
    AI Agent
-	|
-	+-- list_files()
-	+-- read_file()
-	+-- run_tests()
-	+-- edit_file()
-	+-- git_diff()
-	+-- git_status()
-	+-- create PR
-		 |
-		 v
-	  Human Review
+    |
+    +-- list_files()
+    +-- read_file()
+    +-- run_tests()
+    +-- edit_file()
+    +-- git_diff()
+    +-- git_status()
+    +-- create PR
+         |
+         v
+      Human Review
 ```
 
 The agent can decide which tool to call and when:
 
 ```text
 list_files()
-	|
-	v
+    |
+    v
 read_file("app.py")
-	|
-	v
+    |
+    v
 read_file("test_app.py")
-	|
-	v
+    |
+    v
 Analyze failure
-	|
-	v
+    |
+    v
 edit_file("app.py", ...)
-	|
-	v
+    |
+    v
 run_tests()
-	|
-	v
+    |
+    v
 git_diff()
-	|
-	v
+    |
+    v
 Finish or continue
 ```
 
@@ -312,26 +312,26 @@ Phase 5 connects the complete architecture: GitHub Actions, a tool-using AI agen
 
 ```text
 Developer -> GitHub -> GitHub Actions -> pytest
-						  |
-						  v
-					     AI Agent
-						  |
-			  +-----------------+-----------------+
-			  |                 |                 |
-		     tools.py          rag.py       github_tools.py
-		     Files/tests     Knowledge       GitHub API/CLI
-						  |
-						  v
-					 Repair app.py
-						  |
-						  v
-					  Run pytest
-						  |
-						  v
-				     Branch -> Push -> PR
-						  |
-						  v
-					  Human Review
+                          |
+                          v
+                         AI Agent
+                          |
+              +-----------------+-----------------+
+              |                 |                 |
+             tools.py          rag.py       github_tools.py
+             Files/tests     Knowledge       GitHub API/CLI
+                          |
+                          v
+                     Repair app.py
+                          |
+                          v
+                      Run pytest
+                          |
+                          v
+                     Branch -> Push -> PR
+                          |
+                          v
+                      Human Review
 ```
 
 The Phase 5 agent can inspect repository files, search internal DevOps documentation, examine workflow runs and pull requests, modify approved application code, rerun tests, review the Git diff, and create a pull request after a successful repair.
@@ -417,29 +417,29 @@ The project demonstrates the progression from a basic automated test to an agent
 
 ```text
 Developer change
-	|
-	v
+    |
+    v
 Automated CI test
-	|
-	v
+    |
+    v
 Failure captured
-	|
-	v
+    |
+    v
 GenAI explanation
-	|
-	v
+    |
+    v
 Tool-using investigation
-	|
-	v
+    |
+    v
 Guarded code change
-	|
-	v
+    |
+    v
 Verification with pytest
-	|
-	v
+    |
+    v
 Pull request
-	|
-	v
+    |
+    v
 Human review and merge
 ```
 

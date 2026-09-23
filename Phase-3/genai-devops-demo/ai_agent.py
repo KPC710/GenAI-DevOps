@@ -130,7 +130,7 @@ def analyze_failure(test_output):
 if __name__ == "__main__":
     import sys
     test_output = sys.stdin.read()
-    
+
     if not test_output.strip():
         print("No test output received.")
         sys.exit(1)
