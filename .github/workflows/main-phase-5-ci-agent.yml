@@ -1,0 +1,173 @@
+name: AI DevOps Pipeline
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Phase-5/genai-devops-demo
+
+    steps:
+
+      # ---------------------------------------
+      # Checkout
+      # ---------------------------------------
+
+      - name: Checkout repository
+
+        uses: actions/checkout@v4
+
+
+      # ---------------------------------------
+      # Python
+      # ---------------------------------------
+
+      - name: Setup Python
+
+        uses: actions/setup-python@v5
+
+        with:
+          python-version: "3.12"
+
+
+      # ---------------------------------------
+      # Install dependencies
+      # ---------------------------------------
+
+      - name: Install dependencies
+
+        run: |
+
+          python -m pip install --upgrade pip
+
+          pip install -r requirements.txt
+
+
+      # ---------------------------------------
+      # Run tests
+      # ---------------------------------------
+
+      - name: Run tests
+
+        id: tests
+
+        continue-on-error: true
+
+        run: |
+
+          pytest -v 2>&1 | tee ci-output.txt
+
+
+      # ---------------------------------------
+      # Start AI Agent
+      # ---------------------------------------
+
+      - name: Run AI DevOps Agent
+
+        if: steps.tests.outcome == 'failure'
+
+        env:
+
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+        run: |
+
+          python agent.py < ci-output.txt | tee ai-analysis.txt
+
+
+      # ---------------------------------------
+      # Show changes
+      # ---------------------------------------
+
+      - name: Git status
+
+        if: steps.tests.outcome == 'failure'
+
+        run: |
+
+          git status
+
+          git diff
+
+
+      # ---------------------------------------
+      # Create AI branch
+      # ---------------------------------------
+
+      - name: Create AI branch
+
+        if: steps.tests.outcome == 'failure'
+
+        run: |
+
+          BRANCH="ai-fix-${GITHUB_RUN_ID}"
+
+          git checkout -b "$BRANCH"
+
+          git add app.py
+
+          git commit -m "fix: AI generated CI repair" || true
+
+          git push origin "$BRANCH"
+
+
+      # ---------------------------------------
+      # Create Pull Request
+      # ---------------------------------------
+
+      - name: Create Pull Request
+
+        if: steps.tests.outcome == 'failure'
+
+        env:
+
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        run: |
+
+          BRANCH="ai-fix-${GITHUB_RUN_ID}"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "AI generated CI fix" \
+            --body-file ai-analysis.txt
+
+
+      # ---------------------------------------
+      # Upload logs
+      # ---------------------------------------
+
+      - name: Upload AI analysis
+
+        if: steps.tests.outcome == 'failure'
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: ai-devops-analysis
+
+          path: |
+
+            ci-output.txt
+
+            ai-analysis.txt
