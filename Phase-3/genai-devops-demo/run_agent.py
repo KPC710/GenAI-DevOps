@@ -12,11 +12,13 @@ PROJECT_DIR = Path(__file__).resolve().parent
 
 def run_tests():
     result = subprocess.run(
-        ["pytest", "-v"],
+        [sys.executable, "-m", "pytest", "-v"],
         capture_output=True,
         text=True,
     )
     output = result.stdout + "\n" + result.stderr
+    if not output.strip():
+        output = f"pytest exited with code {result.returncode} without producing output."
     return result.returncode, output
 
 def apply_fix(result):
@@ -85,6 +87,7 @@ def main():
         return 0
 
     print("\nTests failed.")
+    print(f"Captured test output ({len(test_output)} characters).")
     print("\nSending failure to GenAI...\n")
 
     try:

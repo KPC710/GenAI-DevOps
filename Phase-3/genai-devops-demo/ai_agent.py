@@ -43,9 +43,11 @@ A CI pipeline has failed.
 
 Your job is to analyze the failure and propose a SAFE minimal code fix.
 
-TEST OUTPUT
------------
+The text between TEST OUTPUT BEGIN and TEST OUTPUT END is the authoritative pytest output. Use it to identify the failed test. Do not claim that the failure context is missing unless the section is empty.
+
+TEST OUTPUT BEGIN
 {test_output}
+TEST OUTPUT END
 
 APPLICATION CODE
 ----------------
@@ -78,6 +80,9 @@ Rules:
 """
 
 def analyze_failure(test_output):
+    if not test_output.strip():
+        raise ValueError("Pytest produced no failure output for analysis.")
+
     client = OpenAI()
     source_code = read_file(PROJECT_DIR / "app.py")
     test_code = read_file(PROJECT_DIR / "test_app.py")
@@ -123,7 +128,6 @@ def analyze_failure(test_output):
 
 if __name__ == "__main__":
     import sys
-
     test_output = sys.stdin.read()
     
     if not test_output.strip():
@@ -132,11 +136,7 @@ if __name__ == "__main__":
 
     try:
         result = analyze_failure(test_output)
-
         print(json.dumps(result, indent=2))
-
     except Exception as exc:
-
         print(f"AI agent failed: {exc}")
-
         sys.exit(1)
