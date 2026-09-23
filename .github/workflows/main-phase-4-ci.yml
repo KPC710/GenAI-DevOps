@@ -59,6 +59,7 @@ jobs:
         id: tests
         continue-on-error: true
         run: |
+          set -o pipefail
           pytest -v 2>&1 | tee ci-output.txt
 
 
@@ -155,7 +156,7 @@ jobs:
       # ==========================================
 
       - name: Fail pipeline
-        if: steps.agent.outcome != 'success'
+        if: steps.tests.outcome == 'failure' && steps.agent.outcome != 'success'
         run: |
           echo "GenAI agent could not safely fix the problem."
           exit 1
